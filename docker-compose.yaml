@@ -1,0 +1,53 @@
+version: '3.8'
+
+networks:
+  myappnetwork:
+    driver: bridge
+
+volumes:
+  volume_data_test:
+    driver: local
+
+services:
+  mysql:
+    container_name: mysql-container
+    image: mysql:5.7
+    volumes:
+      - volume_data_test:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
+    environment:
+      MYSQL_DATABASE: kube_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    networks:
+      - myappnetwork
+    restart: always
+
+  service:
+    container_name: service-container
+    image: "ion21/serv1:1.0.1-arm64"
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mysql
+    networks:
+      - myappnetwork
+
+  client:
+    container_name: client-container
+    image: "ion21/kube-client:v10"
+    ports:
+      - "3000:3000"
+    restart: always
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081
+
+    #      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - service
+    networks:
+      - myappnetwork
