@@ -11,12 +11,8 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000"},
-        methods = {RequestMethod.GET, RequestMethod.POST,RequestMethod.DELETE},
-        allowedHeaders = "*",
-        allowCredentials = "true",
-        maxAge = 3600)
-@RequestMapping("/api/v1")
+//@CrossOrigin(origins = {"http://localhost:3000"})
+@RequestMapping("/api/v1/client")
 //@CrossOrigin
 
 public class MyClientController {
