@@ -1,7 +1,7 @@
 
 spring:
   application:
-    name: api-service
+    name: kube-ms1
   datasource:
     url: jdbc:mysql://localhost:3306/kube_db?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true
     username: root

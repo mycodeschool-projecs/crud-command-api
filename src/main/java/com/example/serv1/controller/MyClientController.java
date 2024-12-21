@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-//@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:3000"})
 @RequestMapping("/api/v1/client")
 //@CrossOrigin
 
@@ -99,10 +99,7 @@ public class MyClientController {
 
         try{
             MyClient client=clientServices.getClientfromEmail(eml);
-            if(client instanceof MyClient){
-                return ResponseEntity.ok(client);
-            }
-                throw new Exception("Eroare de instanta Client din find");
+            return ResponseEntity.ok(client);
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
