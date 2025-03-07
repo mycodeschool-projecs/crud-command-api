@@ -55,3 +55,22 @@ jobs:
           git add .
           git commit -m "new app version: ${{ env.BUILD_NUMBER }}"
           git push origin HEAD:master
+
+      - name: Checkout crud-k8s-files repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'mycodeschool-projecs/crud-k8s-files'
+          token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
+          path: 'crud-k8s-files'
+
+      - name: Update and commit app version in deployment-kube-land.yml in other repository
+        run: |
+          cd crud-k8s-files/
+          echo -e "Current ./deployment-api.yaml\n$(cat deployment-api.yaml)"
+          sed -i -E 's_(mycodeschool/kube-ms1:)([^"]*)_\1'${{ env.BUILD_NUMBER }}'_' deployment-api.yaml
+          echo -e "Updated ./deployment-api.yaml\n$(cat deployment-api.yaml)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "new k8s api: ${{ env.BUILD_NUMBER }}"
+          git push origin HEAD:master
