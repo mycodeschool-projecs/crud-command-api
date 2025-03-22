@@ -6,12 +6,12 @@ spring:
     url: jdbc:mysql://localhost:3306/kube_db?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true
     username: root
     password: root
-
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate-dialect: org.hibernate.dialect.MySQL5Dialect
+      hibernate-dialect: org.hibernate.dialect.MySQL8Dialect
       hibernate.format_sql: true
     show-sql: true
 
