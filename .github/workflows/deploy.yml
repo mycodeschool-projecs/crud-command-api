@@ -57,7 +57,7 @@ jobs:
           git config user.email github-actions@github.com
           git add .
           git commit -m "new app version: ${{ env.BUILD_NUMBER }}"
-          git push origin HEAD: master
+          git push origin HEAD:master
 
       - name: Checkout crud-k8s-files repository
         uses: actions/checkout@v2
@@ -76,4 +76,4 @@ jobs:
           git config user.email github-actions@github.com
           git add .
           git commit -m "new k8s api: ${{ env.BUILD_NUMBER }}"
-          git push origin HEAD: master
+          git push origin HEAD:master
