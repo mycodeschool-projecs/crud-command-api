@@ -1,12 +1,12 @@
 package com.example.serv1.controller;
 
+import com.example.serv1.logs.StructuredLogger;
 import com.example.serv1.model.MyClient;
 import com.example.serv1.services.MyClientServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import system.logs.StructuredLogger;
 
 import java.util.List;
 

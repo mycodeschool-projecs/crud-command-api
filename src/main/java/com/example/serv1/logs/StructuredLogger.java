@@ -1,4 +1,4 @@
-package system.logs;
+package com.example.serv1.logs;
 
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
