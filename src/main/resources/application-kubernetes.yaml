@@ -3,6 +3,25 @@ spring:
     url: jdbc:mysql://mysql-service:3306/testdb?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: testuser
     password: testpass
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # Temporar setează la 100% pentru testare
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+metrics:
+  distribution:
+    percentiles-histogram:
+      http:
+        server:
+          requests: true
+
 logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    org.springframework: INFO
+    root: debug
+  file:
+    name: kube-ms1-logs.log

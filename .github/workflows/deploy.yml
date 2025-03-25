@@ -2,10 +2,7 @@ name: CD - Deploy kube-ms1
 
 on:
   push:
-    branches:
-      - '*'           # All branches
-      - '!dev'         # Exclude dev branch
-      - '!feature/*'   # Exclude all feature branches
+    branches: [ '**' ]
   workflow_dispatch:
 
 permissions:

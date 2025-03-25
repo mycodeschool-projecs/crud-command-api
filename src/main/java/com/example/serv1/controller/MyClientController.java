@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import system.logs.StructuredLogger;
 
 import java.util.List;
 
@@ -19,8 +20,10 @@ public class MyClientController {
 
     private MyClientServices clientServices;
 
-    public MyClientController(MyClientServices clientServices) {
+    private StructuredLogger logger;
+    public MyClientController(MyClientServices clientServices,StructuredLogger logger) {
         this.clientServices = clientServices;
+        this.logger=logger;
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -31,11 +34,18 @@ public class MyClientController {
         try{
             MyClient newClient=clientServices.addClient(client);
             if(newClient!=null){
+                logger.logBuilder()
+                        .withLevel("INFO")
+                        .withMessage("MS1_ADDUSER_OK")
+                        .withField("msAddClient",client).log();
                 return ResponseEntity.ok(newClient);
             }
             return ResponseEntity.badRequest().body(null);
 
         }catch (Exception e){
+            logger.logBuilder()
+                    .withLevel("ERROR")
+                    .withMessage(e.getMessage()).log();
             return ResponseEntity.badRequest().body(null);
         }
 
