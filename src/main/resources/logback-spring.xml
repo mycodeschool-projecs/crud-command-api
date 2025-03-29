@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- Define the service name -->
+    <!-- Define the service name -->
+    <property name="SERVICE_NAME" value="Kube-ms1"/>
+
+    <!-- Define the Logstash destination with a default -->
+    <property name="LOGSTASH_DESTINATION" value="${LOGSTASH_DESTINATION:-logstash:3100}"/>
+
+    <!-- Rolling File Appender -->
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/kube-land_logs.log</file>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd HH:mm:ss</pattern>
+                </timestamp>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <logstashMarkers>
+                    <fieldName>markers</fieldName>
+                </logstashMarkers>
+                <mdc>
+                    <fieldName>mdc</fieldName>
+                    <includeMdcKeyName>*</includeMdcKeyName>
+                </mdc>
+                <arguments>
+                    <fieldName>args</fieldName>
+                </arguments>
+                <pattern>
+                    <pattern>
+                        {
+                        "serviceName": "${SERVICE_NAME}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/kube-land_logs.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd HH:mm:ss</pattern>
+                </timestamp>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <logstashMarkers>
+                    <fieldName>markers</fieldName>
+                </logstashMarkers>
+                <mdc>
+                    <fieldName>mdc</fieldName>
+                    <includeMdcKeyName>*</includeMdcKeyName>
+                </mdc>
+                <arguments>
+                    <fieldName>args</fieldName>
+                </arguments>
+                <pattern>
+                    <pattern>
+                        {
+                        "serviceName": "${SERVICE_NAME}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Logstash Appender -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>logstash:3100</destination>
+        <includeCallerData>true</includeCallerData>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>version</version>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+                <context>context</context>
+                <mdc>mdc</mdc>
+                <tags>tags</tags>
+                <fields>fields</fields>
+                <stackTrace>stackTrace</stackTrace>
+            </fieldNames>
+            <customFields>{"serviceName": "${SERVICE_NAME}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger -->
+    <root level="debug">
+        <appender-ref ref="ROLLING"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+</configuration>

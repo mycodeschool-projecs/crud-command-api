@@ -2,7 +2,7 @@ name: CD - Deploy kube-ms1
 
 on:
   push:
-    branches: [ master ]
+    branches: [ '**' ]
   workflow_dispatch:
 
 permissions:

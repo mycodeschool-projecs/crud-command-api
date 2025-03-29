@@ -3,24 +3,51 @@ spring:
   application:
     name: kube-ms1
   datasource:
-    url: jdbc:mysql://localhost:3306/kube_db?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/kube_db?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: root
     password: root
-
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate-dialect: org.hibernate.dialect.MySQL5Dialect
+      hibernate-dialect: org.hibernate.dialect.MySQL8Dialect
       hibernate.format_sql: true
     show-sql: true
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # Temporar setează la 100% pentru testare
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+#      access: read_only
+      enabled: true
+
+metrics:
+  distribution:
+    percentiles-histogram:
+      http:
+        server:
+          requests: true
+
 logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    com.zaxxer.hikari: WARN
-    org.hibernate.orm.deprecation: ERROR
-    org.hibernate.orm.connections.pooling: WARN
-    root: INFO
+    root: debug
+  file:
+    name: kube-ms1-logs.log
 
 server:
   error:

@@ -21,7 +21,7 @@ services:
     ports:
       - "3307:3306"
     networks:
-      - myappnetwork
+      - mynet
     restart: always
 
   service:
