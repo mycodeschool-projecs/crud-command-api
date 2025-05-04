@@ -2,6 +2,7 @@ package com.example.serv1.controller;
 
 import com.example.serv1.logs.StructuredLogger;
 import com.example.serv1.model.MyClient;
+import com.example.serv1.repository.NoteRepository;
 import com.example.serv1.services.MyClientServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @Slf4j
@@ -21,9 +26,12 @@ public class MyClientController {
     private MyClientServices clientServices;
 
     private StructuredLogger logger;
-    public MyClientController(MyClientServices clientServices,StructuredLogger logger) {
+    private NoteRepository noteRepository;
+
+    public MyClientController(MyClientServices clientServices,StructuredLogger logger,NoteRepository noteRepository) {
         this.clientServices = clientServices;
         this.logger=logger;
+        this.noteRepository=noteRepository;
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -31,23 +39,64 @@ public class MyClientController {
     public ResponseEntity<MyClient> addClient(@RequestBody MyClient client)  {
 
 
-        try{
-            MyClient newClient=clientServices.addClient(client);
-            if(newClient!=null){
-                logger.logBuilder()
-                        .withLevel("INFO")
-                        .withMessage("MS1_ADDUSER_OK")
-                        .withField("msAddClient",client).log();
-                return ResponseEntity.ok(newClient);
-            }
-            return ResponseEntity.badRequest().body(null);
+           AtomicReference<MyClient> addClient= new AtomicReference<>(new MyClient());
+           ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        }catch (Exception e){
-            logger.logBuilder()
-                    .withLevel("ERROR")
-                    .withMessage(e.getMessage()).log();
-            return ResponseEntity.badRequest().body(null);
-        }
+            Runnable task = () -> {
+                try {
+                    addClient.set(clientServices.getClientfromEmail(client.getEmail()));
+
+                }catch (Exception e){
+
+                }
+            };
+            scheduler.schedule(task, 5, TimeUnit.SECONDS);
+
+            scheduler.shutdown();
+
+            if(addClient.get()!=null){
+                return ResponseEntity.ok(addClient.get());
+            }else {
+                return ResponseEntity.badRequest().body(null);
+
+            }
+
+
+//        try{
+//
+//
+//            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//
+//            Runnable task = () -> {
+//               MyClient addClient= clientServices.getClientfromEmail(client.getEmail());
+//            };
+//            scheduler.schedule(task, 5, TimeUnit.SECONDS);
+//
+//            scheduler.shutdown();
+////
+////            if(noteRepository.findAllByEmailAndOperation(client.getEmail(),"added").size()>0){
+////                return ResponseEntity.ok(clientServices.getClientfromEmail(client.getEmail()));
+////            }
+//
+////            MyClient newClient=clientServices.addClient(client);
+//////            MyClient newClient=new MyClient();
+////
+////            if(newClient!=null){
+////
+////                logger.logBuilder()
+////                        .withLevel("INFO")
+////                        .withMessage("MS1_ADDUSER_OK")
+////                        .withField("msAddClient",client).log();
+////                return ResponseEntity.ok(newClient);
+////            }
+//            return ResponseEntity.badRequest().body(null);
+//
+//        }catch (Exception e){
+//            logger.logBuilder()
+//                    .withLevel("ERROR")
+//                    .withMessage(e.getMessage()).log();
+//            return ResponseEntity.badRequest().body(null);
+//        }
 
 
     }
@@ -115,4 +164,24 @@ public class MyClientController {
         }
 
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/status/{eml}")
+    public ResponseEntity<String> getStatus(@PathVariable String email){
+            if(noteRepository.findAllByEmailAndOperation(email,"ADD_CLIENT").size()==0){
+                return ResponseEntity.ok("finish add");
+            }
+
+        if(noteRepository.findAllByEmailAndOperation(email,"UPD_CLIENT").size()==0){
+            return ResponseEntity.ok("finish update");
+        }
+
+
+        if(noteRepository.findAllByEmailAndOperation(email,"DEL_CLIENT").size()==0){
+            return ResponseEntity.ok("finish delete");
+        }
+
+        return ResponseEntity.ok("Working...");
+    }
+
 }
