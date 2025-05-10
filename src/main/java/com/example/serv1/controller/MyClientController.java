@@ -2,9 +2,10 @@ package com.example.serv1.controller;
 
 import com.example.serv1.logs.StructuredLogger;
 import com.example.serv1.model.MyClient;
-import com.example.serv1.repository.NoteRepository;
+import com.example.serv1.rabbitMQListener.RabbitTemplateConfig;
 import com.example.serv1.services.MyClientServices;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,17 +27,20 @@ public class MyClientController {
     private MyClientServices clientServices;
 
     private StructuredLogger logger;
-    private NoteRepository noteRepository;
 
-    public MyClientController(MyClientServices clientServices,StructuredLogger logger,NoteRepository noteRepository) {
+
+    @Autowired
+    private RabbitTemplateConfig rabbitTemplate;
+
+    public MyClientController(MyClientServices clientServices,StructuredLogger logger) {
         this.clientServices = clientServices;
         this.logger=logger;
-        this.noteRepository=noteRepository;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/add")
     public ResponseEntity<MyClient> addClient(@RequestBody MyClient client)  {
+
 
 
            AtomicReference<MyClient> addClient= new AtomicReference<>(new MyClient());
@@ -100,6 +104,9 @@ public class MyClientController {
 
 
     }
+
+
+
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/upd")
@@ -168,18 +175,18 @@ public class MyClientController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/status/{eml}")
     public ResponseEntity<String> getStatus(@PathVariable String email){
-            if(noteRepository.findAllByEmailAndOperation(email,"ADD_CLIENT").size()==0){
-                return ResponseEntity.ok("finish add");
-            }
-
-        if(noteRepository.findAllByEmailAndOperation(email,"UPD_CLIENT").size()==0){
-            return ResponseEntity.ok("finish update");
-        }
-
-
-        if(noteRepository.findAllByEmailAndOperation(email,"DEL_CLIENT").size()==0){
-            return ResponseEntity.ok("finish delete");
-        }
+//            if(noteRepository.findAllByEmailAndOperation(email,"ADD_CLIENT").size()==0){
+//                return ResponseEntity.ok("finish add");
+//            }
+//
+//        if(noteRepository.findAllByEmailAndOperation(email,"UPD_CLIENT").size()==0){
+//            return ResponseEntity.ok("finish update");
+//        }
+//
+//
+//        if(noteRepository.findAllByEmailAndOperation(email,"DEL_CLIENT").size()==0){
+//            return ResponseEntity.ok("finish delete");
+//        }
 
         return ResponseEntity.ok("Working...");
     }
