@@ -4,6 +4,12 @@ spring:
     username: root
     password: root
 
+  rabbitmq:
+    port: 5672
+    username: guest
+    password: guest
+    host: rabbitmq
+
 management:
   tracing:
     sampling:

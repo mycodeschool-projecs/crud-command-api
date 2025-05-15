@@ -45,6 +45,7 @@ public class MyClientServices {
         message.setPriority(7);
         message.setContent(note);
         message.setMessage("processed");
+
         messagePublisher.sendMessageStringNotes(message);
     }
 

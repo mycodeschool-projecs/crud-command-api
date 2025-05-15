@@ -5,6 +5,9 @@ import com.example.serv1.model.MyClient;
 import com.example.serv1.services.MyClientServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +20,12 @@ public class MyMessageListener{
     private String id_note="";
 
 
-    public MyMessageListener(MyClientServices myClientServices){
+    private final RabbitListenerEndpointRegistry registry;
+
+    public MyMessageListener(MyClientServices myClientServices,
+                             RabbitListenerEndpointRegistry registry){
+
+        this.registry=registry;
         this.myClientServices=myClientServices;
     }
 
@@ -37,32 +45,28 @@ public class MyMessageListener{
 
 
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_THREE)
+    @RabbitListener(id="queue3Lis",queues = RabbitMQConfig.QUEUE_THREE)
     public void receiveMessageStringNotes(MyMessage<String> message) {
 //
         if (readyForQueueThree) {
             log.info("QUEUE_THREE: {}", message);
-            String idNote=message.getMessage();
+            String idNote = message.getMessage();
             // după procesare, resetezi
             readyForQueueThree = false;
             myClientServices.sendMessageNote(idNote);
+            registry.getListenerContainer("queue3Lis").stop();
+
         } else {
             log.warn("QUEUE_THREE message primit, dar încă nu e permis. Ignorat sau requeue.");
             // opțional: aruncă excepție ca să fie retrimis în coadă
             throw new RuntimeException("Not ready for QUEUE_THREE");
         }
-//        if(message.getMessage().trim().equals("DEL_PROD_ID")){
-//            mapStocService.delMapStoc(message.getContent().trim());
-//            log.info("A mers stergerea");
-//
-//            System.out.println("Received message: " +message.toString());
-//
-//        }
+
 
     }
 
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_TWO)
+    @RabbitListener(id="queue2Lis",queues = RabbitMQConfig.QUEUE_TWO)
     public void receiveMessageMyClient(MyMessage<MyClient> message) throws Exception {
 //
         if(message.getMessage().trim().equals("ADD_CLIENT")){
@@ -70,6 +74,7 @@ public class MyMessageListener{
                 myClientServices.addClient(message.getContent());
                 readyForQueueThree=true;
 
+                registry.getListenerContainer("queue3Lis").start();
                 log.info("Add Client "+message.toString());
             }catch (Exception e){
                 log.error("ADD_CLIENT_FAIL");
