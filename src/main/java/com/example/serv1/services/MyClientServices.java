@@ -7,6 +7,7 @@ import com.example.serv1.rabbitMQListener.RabbitTemplateConfig;
 import com.example.serv1.repository.MyClientRepository;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,10 +19,13 @@ public class MyClientServices {
 
     private MessagePublisher messagePublisher;
 
+    private SimpMessagingTemplate messagingTemplate;
+
     public MyClientServices(MyClientRepository clientRepository,
-                            MessagePublisher messagePublisher){
+                            MessagePublisher messagePublisher,SimpMessagingTemplate messagingTemplate){
         this.clientRepository=clientRepository;
         this.messagePublisher=messagePublisher;
+        this.messagingTemplate=messagingTemplate;
     }
 
     public MyClient addClient(MyClient newClient) throws Exception {
@@ -110,4 +114,11 @@ public class MyClientServices {
 
     }
 
+    public void sendGlobalNotification(String message) {
+        messagingTemplate.convertAndSend("/topic/messages", message);
+    }
+
+    public void sendPrivateNotification(String username, String message) {
+        messagingTemplate.convertAndSendToUser(username, "/queue/messages", message);
+    }
 }

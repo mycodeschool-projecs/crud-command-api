@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,29 +43,29 @@ public class MyClientController {
     @PostMapping("/add")
     public ResponseEntity<MyClient> addClient(@RequestBody MyClient client)  {
 
-
-
-           AtomicReference<MyClient> addClient= new AtomicReference<>(new MyClient());
-           ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-            Runnable task = () -> {
-                try {
-                    addClient.set(clientServices.getClientfromEmail(client.getEmail()));
-
-                }catch (Exception e){
-
-                }
-            };
-            scheduler.schedule(task, 5, TimeUnit.SECONDS);
-
-            scheduler.shutdown();
-
-            if(addClient.get()!=null){
-                return ResponseEntity.ok(addClient.get());
-            }else {
-                return ResponseEntity.badRequest().body(null);
-
-            }
+            return ResponseEntity.ok(null);
+//
+//           AtomicReference<MyClient> addClient= new AtomicReference<>(new MyClient());
+//           ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//
+//            Runnable task = () -> {
+//                try {
+//                    addClient.set(clientServices.getClientfromEmail(client.getEmail()));
+//
+//                }catch (Exception e){
+//
+//                }
+//            };
+//            scheduler.schedule(task, 5, TimeUnit.SECONDS);
+//
+//            scheduler.shutdown();
+//
+//            if(addClient.get()!=null){
+//                return ResponseEntity.ok(addClient.get());
+//            }else {
+//                return ResponseEntity.badRequest().body(null);
+//
+//            }
 
 
 //        try{
@@ -191,4 +193,10 @@ public class MyClientController {
         return ResponseEntity.ok("Working...");
     }
 
+// websocket message
+    @MessageMapping("/chat") // clientul trimite la /app/chat
+    @SendTo("/topic/messages") // serverul trimite la /topic/messages
+    public String handleMessage(String message) {
+        return "Client: " + message;
+    }
 }

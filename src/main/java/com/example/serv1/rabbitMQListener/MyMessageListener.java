@@ -3,12 +3,21 @@ package com.example.serv1.rabbitMQListener;
 //import com.example.commandservice.service.MapStocServiceImpl;
 import com.example.serv1.model.MyClient;
 import com.example.serv1.services.MyClientServices;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
 
 @Component
 @Slf4j
@@ -22,11 +31,16 @@ public class MyMessageListener{
 
     private final RabbitListenerEndpointRegistry registry;
 
+    private final ApplicationEventPublisher eventPublisher;
+
+
     public MyMessageListener(MyClientServices myClientServices,
-                             RabbitListenerEndpointRegistry registry){
+                             RabbitListenerEndpointRegistry registry,
+                             ApplicationEventPublisher eventPublisher){
 
         this.registry=registry;
         this.myClientServices=myClientServices;
+        this.eventPublisher=eventPublisher;
     }
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_ONE)
@@ -45,22 +59,34 @@ public class MyMessageListener{
 
 
 
-    @RabbitListener(id="queue3Lis",queues = RabbitMQConfig.QUEUE_THREE)
-    public void receiveMessageStringNotes(MyMessage<String> message) {
+    @RabbitListener(id="queue3Lis",queues = RabbitMQConfig.QUEUE_THREE,ackMode = "MANUAL")
+    public void receiveMessageStringNotes(MyMessage<String> message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
 //
-        if (readyForQueueThree) {
-            log.info("QUEUE_THREE: {}", message);
-            String idNote = message.getMessage();
-            // după procesare, resetezi
-            readyForQueueThree = false;
-            myClientServices.sendMessageNote(idNote);
-            registry.getListenerContainer("queue3Lis").stop();
+        String messThree=message.getContent();
+        MessageListenerContainer container = registry.getListenerContainer("queue3Lis");
+        myClientServices.sendMessageNote(messThree);
 
-        } else {
-            log.warn("QUEUE_THREE message primit, dar încă nu e permis. Ignorat sau requeue.");
-            // opțional: aruncă excepție ca să fie retrimis în coadă
-            throw new RuntimeException("Not ready for QUEUE_THREE");
+        channel.basicAck(tag,false);
+        if (container != null && container.isRunning()) {
+            container.stop();
+            log.info("queue3Lis STOPPED");
         }
+
+
+//        if (readyForQueueThree) {
+//            log.info("QUEUE_THREE: {}", message);
+//            String idNote = message.getMessage();
+//            // după procesare, resetezi
+//            readyForQueueThree = false;
+//            myClientServices.sendMessageNote(idNote);
+//            registry.getListenerContainer("queue3Lis").stop();
+//
+//        } else {
+//            log.warn("QUEUE_THREE message primit, dar încă nu e permis. Ignorat sau requeue.");
+//            // opțional: aruncă excepție ca să fie retrimis în coadă
+//            throw new RuntimeException("Not ready for QUEUE_THREE");
+//        }
+//
 
 
     }
@@ -73,8 +99,9 @@ public class MyMessageListener{
             try {
                 myClientServices.addClient(message.getContent());
                 readyForQueueThree=true;
+                eventPublisher.publishEvent(new ReadyForQueueThreeEvent(this));
 
-                registry.getListenerContainer("queue3Lis").start();
+//                registry.getListenerContainer("queue3Lis").start();
                 log.info("Add Client "+message.toString());
             }catch (Exception e){
                 log.error("ADD_CLIENT_FAIL");
