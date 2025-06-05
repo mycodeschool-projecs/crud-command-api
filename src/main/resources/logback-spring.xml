@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- Define the service name -->
+    <property name="SERVICE_NAME" value="kube-ms1"/>
+
+    <!-- Read Logstash configuration from application.yaml -->
+    <springProperty scope="context" name="LOGSTASH_DESTINATION" source="logging.logstash.destination" defaultValue="localhost:3100"/>
+    <springProperty scope="context" name="LOGSTASH_ENABLED" source="logging.logstash.enabled" defaultValue="false"/>
+    <springProperty scope="context" name="LOGSTASH_LEVEL" source="logging.logstash.level" defaultValue="OFF"/>
+
+    <!-- Rolling File Appender -->
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/kube-ms1_logs.log</file>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd HH:mm:ss</pattern>
+                </timestamp>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <logstashMarkers>
+                    <fieldName>markers</fieldName>
+                </logstashMarkers>
+                <mdc>
+                    <fieldName>mdc</fieldName>
+                    <includeMdcKeyName>*</includeMdcKeyName>
+                </mdc>
+                <arguments>
+                    <fieldName>args</fieldName>
+                </arguments>
+                <pattern>
+                    <pattern>
+                        {
+                        "serviceName": "${SERVICE_NAME}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/kube-ms1_logs.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd HH:mm:ss</pattern>
+                </timestamp>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <logstashMarkers>
+                    <fieldName>markers</fieldName>
+                </logstashMarkers>
+                <mdc>
+                    <fieldName>mdc</fieldName>
+                    <includeMdcKeyName>*</includeMdcKeyName>
+                </mdc>
+                <arguments>
+                    <fieldName>args</fieldName>
+                </arguments>
+                <pattern>
+                    <pattern>
+                        {
+                        "serviceName": "${SERVICE_NAME}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Logstash Appender -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_DESTINATION}</destination>
+        <includeCallerData>true</includeCallerData>
+        <reconnectionDelay>10 seconds</reconnectionDelay>
+        <connectionTimeout>5 seconds</connectionTimeout>
+        <writeTimeout>5 seconds</writeTimeout>
+        <!-- Don't block the application if Logstash is not available -->
+        <droppedWarnFrequency>5 minutes</droppedWarnFrequency>
+        <droppedWarnMaxBurst>10000</droppedWarnMaxBurst>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>version</version>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+                <context>context</context>
+                <mdc>mdc</mdc>
+                <tags>tags</tags>
+                <fields>fields</fields>
+                <stackTrace>stackTrace</stackTrace>
+            </fieldNames>
+            <customFields>{"serviceName": "${SERVICE_NAME}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Async Logstash Appender with level filter -->
+    <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="LOGSTASH" />
+        <includeCallerData>true</includeCallerData>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+        <!-- Simple level filter that denies all events if level is OFF -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>${LOGSTASH_LEVEL}</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- Root Logger -->
+    <root level="debug">
+        <appender-ref ref="ROLLING"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_LOGSTASH"/>
+    </root>
+</configuration>
