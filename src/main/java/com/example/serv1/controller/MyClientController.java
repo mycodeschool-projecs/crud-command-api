@@ -29,11 +29,6 @@ public class MyClientController {
         this.clientServices = clientServices;
     }
 
-    /**
-     * Create a new client
-     * @param client The client to create
-     * @return The created client
-     */
     @Operation(summary = "Create a new client", description = "Creates a new client with the provided information")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Client created successfully",
@@ -59,12 +54,6 @@ public class MyClientController {
         }
     }
 
-    /**
-     * Update an existing client
-     * @param id The client ID
-     * @param client The updated client data
-     * @return The updated client
-     */
     @Operation(summary = "Update an existing client", description = "Updates an existing client with the provided information")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Client updated successfully",
@@ -79,7 +68,6 @@ public class MyClientController {
             @RequestBody MyClient client) {
         log.info("Updating client with ID: {}", id);
 
-        // Ensure the path ID matches the client ID
         if (!id.equals(client.getId())) {
             log.error("Path ID {} does not match client ID {}", id, client.getId());
             return ResponseEntity.badRequest().build();
@@ -101,10 +89,6 @@ public class MyClientController {
         }
     }
 
-    /**
-     * Get all clients
-     * @return List of all clients
-     */
     @Operation(summary = "Get all clients", description = "Retrieves a list of all clients in the system")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of clients",
@@ -125,11 +109,6 @@ public class MyClientController {
     }
 
 
-    /**
-     * Delete a client by email
-     * @param email The email of the client to delete
-     * @return Success status
-     */
     @Operation(summary = "Delete a client by email", description = "Deletes a client with the specified email address")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Client successfully deleted"),
@@ -155,11 +134,6 @@ public class MyClientController {
         }
     }
 
-    /**
-     * Get a client by email
-     * @param email The email of the client to find
-     * @return The client if found
-     */
     @Operation(summary = "Get a client by email", description = "Retrieves a client with the specified email address")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved client",
@@ -186,11 +160,6 @@ public class MyClientController {
         }
     }
 
-    /**
-     * Get a client by ID
-     * @param id The ID of the client to find
-     * @return The client if found
-     */
     @Operation(summary = "Get a client by ID", description = "Retrieves a client with the specified ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved client",
@@ -204,9 +173,6 @@ public class MyClientController {
             @Parameter(description = "ID of the client to find") @PathVariable Long id) {
         log.info("Finding client with ID: {}", id);
         try {
-            // This is a placeholder - the service doesn't have a getClientById method yet
-            // In a real implementation, we would call clientServices.getClientById(id)
-            // For now, we'll return a 501 Not Implemented
             log.warn("getClientById not implemented yet");
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
         } catch (Exception e) {
