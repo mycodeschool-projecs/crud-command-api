@@ -41,8 +41,8 @@ public class MyClientServices {
         log.info("Adding new client with email: {}", newClient.getEmail());
 
         try {
-            List<MyClient> existingClients = clientRepository.findByEmail(newClient.getEmail());
-            if (existingClients.isEmpty()) {
+            Optional<MyClient> existingClients = clientRepository.findByEmail(newClient.getEmail());
+            if (!existingClients.isPresent()) {
                 // Save the client
                 MyClient savedClient = clientRepository.save(newClient);
                 log.info("Client saved successfully with ID: {}", savedClient.getId());
@@ -107,8 +107,8 @@ public class MyClientServices {
     public MyClient getClientfromEmail(String email) throws Exception {
 
         try{
-            if(clientRepository.findByEmail(email).size()>0){
-                return clientRepository.findByEmail(email).get(0);
+            if(clientRepository.findByEmail(email).isPresent()){
+                return clientRepository.findByEmail(email).get();
             }else{
                 throw new Exception("Client did not exists!!");
             }
@@ -121,11 +121,11 @@ public class MyClientServices {
     public boolean delClient(String email) throws Exception {
 
         try{
-            List<MyClient> delClient=clientRepository.findByEmail(email);
+            Optional<MyClient> delClient=clientRepository.findByEmail(email);
 
-            if(delClient.size()==1){
+            if(delClient.isPresent()){
                 System.out.println("In del client");
-                clientRepository.delete(delClient.get(0));
+                clientRepository.delete(delClient.get());
                 return true;
             }else{
                 throw new Exception("Client with email did not exists!!");

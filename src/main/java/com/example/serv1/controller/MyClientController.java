@@ -115,7 +115,7 @@ public class MyClientController {
         @ApiResponse(responseCode = "404", description = "Client not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @DeleteMapping("/email/{email}")
+    @DeleteMapping("/delete/email/{email}")
     public ResponseEntity<Void> deleteClientByEmail(
             @Parameter(description = "Email of the client to delete") @PathVariable String email) {
         log.info("Deleting client with email: {}", email);
@@ -141,7 +141,8 @@ public class MyClientController {
         @ApiResponse(responseCode = "404", description = "Client not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/email/{email}")
+
+    @GetMapping("/find/email/{email}")
     public ResponseEntity<MyClient> getClientByEmail(
             @Parameter(description = "Email of the client to find") @PathVariable String email) {
         log.info("Finding client with email: {}", email);
