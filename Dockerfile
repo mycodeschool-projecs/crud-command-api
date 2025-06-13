@@ -6,7 +6,7 @@ FROM openjdk:19-jdk-slim
 #Metadata as described above
 LABEL maintainer = "constantin.nimigean@gmail.com"
 LABEL version = "1.0"
-LABEL description = "Docker image for serv1 Srping boot application"
+LABEL description = "Docker image for kube-ms1 Srping boot application"
 
 #Set the current working directory inside the image
 WORKDIR /app
