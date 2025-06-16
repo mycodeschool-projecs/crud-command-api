@@ -125,7 +125,6 @@ jobs:
             git commit -m "chore: update crud-command-api to ${{ needs.build-api.outputs.tag }}"
 #            git push origin HEAD:master
             git push origin HEAD:${GITHUB_REF#refs/heads/}
-
             echo "✅ Pushed new version: ${{ needs.build-api.outputs.tag }}"
           fi
 
