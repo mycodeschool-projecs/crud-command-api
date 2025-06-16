@@ -91,7 +91,7 @@ jobs:
       - name: Checkout docker-files repository
         uses: actions/checkout@v4
         with:
-          repository: 'mycodeschool-projects/crud-docker-files'  # Fixed typo
+          repository: 'mycodeschool/crud-docker-files'  # Fixed typo
           token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
           path: 'crud-docker-files'
 
