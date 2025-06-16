@@ -84,59 +84,59 @@ jobs:
   update-docker-compose:
     needs: build-api
     runs-on: ubuntu-latest
+#    steps:
+#      - run: echo "Deploying version ${{ needs.build-api.outputs.tag }}"
+    env:
+      TAG: ${{ needs.build-api.outputs.tag }}
+      ENVIRONMENT: ${{ needs.build-api.outputs.environment }}
     steps:
-      - run: echo "Deploying version ${{ needs.build-api.outputs.tag }}"
-#    env:
-#      TAG: ${{ needs.build-api.outputs.tag }}
-#      ENVIRONMENT: ${{ needs.build-api.outputs.environment }}
-#    steps:
-#      - name: Checkout docker-files repository
-#        uses: actions/checkout@v4
-#        with:
-#          repository: 'mycodeschool-projecs/crud-docker-files'  # Fixed typo
-#          token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
-#          path: 'crud-docker-files'
-#
-#      - name: Update docker-compose.yml
-#        run: |
-#          cd crud-docker-files/
-#
-#          echo "📋 Current docker-compose.yaml:"
-#          cat docker-compose.yaml
-#
-#          # Update the image tag
-#          sed -i -E "s|(mycodeschool/crud-command-api:)[^[:space:]\"']+|\1${env.TAG}|g" docker-compose.yaml
-#
-#          echo -e "\n✅ Updated docker-compose.yaml:"
-#          cat docker-compose.yaml
-#
-#      - name: Commit and push changes
-#        run: |
-#          cd crud-docker-files/
-#
-#          git config user.name "github-actions[bot]"
-#          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-#
-#          git add docker-compose.yaml
-#
-#          if git diff --staged --quiet; then
-#            echo "📝 No changes to commit"
-#          else
-#            git commit -m "chore: update crud-command-api to ${TAG}"
-#            git push origin HEAD:master
-#            echo "✅ Pushed new version: ${TAG}"
-#          fi
-#
-#  notify-success:
-#    needs: [build-api, update-docker-compose]
-#    runs-on: ubuntu-latest
-#    if: success()
-#    steps:
-#      - name: Summary
-#        run: |
-#          echo "## 🎉 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
-#          echo "" >> $GITHUB_STEP_SUMMARY
-#          echo "- **Image**: mycodeschool/crud-command-api:${{ needs.build-api.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-#          echo "- **Environment**: ${{ needs.build-api.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
-#          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-#          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+      - name: Checkout docker-files repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'mycodeschool-projecs/crud-docker-files'  # Fixed typo
+          token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
+          path: 'crud-docker-files'
+
+      - name: Update docker-compose.yml
+        run: |
+          cd crud-docker-files/
+
+          echo "📋 Current docker-compose.yaml:"
+          cat docker-compose.yaml
+
+          # Update the image tag
+          sed -i -E "s|(mycodeschool/crud-command-api:)[^[:space:]\"']+|\1${{ needs.build-api.outputs.tag }}|g" docker-compose.yaml
+
+          echo -e "\n✅ Updated docker-compose.yaml:"
+          cat docker-compose.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd crud-docker-files/
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docker-compose.yaml
+
+          if git diff --staged --quiet; then
+            echo "📝 No changes to commit"
+          else
+            git commit -m "chore: update crud-command-api to ${{ needs.build-api.outputs.tag }}"
+            git push origin HEAD:master
+            echo "✅ Pushed new version: ${{ needs.build-api.outputs.tag }}"
+          fi
+
+  notify-success:
+    needs: [build-api, update-docker-compose]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Summary
+        run: |
+          echo "## 🎉 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: mycodeschool/crud-command-api:${{ needs.build-api.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ needs.build-api.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
