@@ -123,7 +123,7 @@ jobs:
             echo "📝 No changes to commit"
           else
             git commit -m "chore: update crud-command-api to ${{ needs.build-api.outputs.tag }}"
-            git push origin HEAD:${{GITHUB_REF#refs/heads/}}
+            git push origin HEAD:${{ github.ref_name }}
             echo "✅ Pushed new version: ${{ needs.build-api.outputs.tag }}"
           fi
 
