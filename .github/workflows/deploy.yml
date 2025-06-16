@@ -103,7 +103,7 @@ jobs:
           cat docker-compose.yaml
           
           # Update the image tag
-          sed -i -E "s|(mycodeschool/crud-command-api:)[^[:space:]\"']+|\1${TAG}|g" docker-compose.yaml
+          sed -i -E "s|(mycodeschool/crud-command-api:)[^[:space:]\"']+|\1${env.TAG}|g" docker-compose.yaml
           
           echo -e "\n✅ Updated docker-compose.yaml:"
           cat docker-compose.yaml
