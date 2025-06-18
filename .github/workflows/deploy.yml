@@ -81,6 +81,7 @@ jobs:
           chmod +x ci/build-publish.sh
           ./ci/build-publish.sh . --build-arg SPRING_PROFILES_ACTIVE=docker
 
+
   update-docker-compose:
     needs: build-api
     runs-on: ubuntu-latest
@@ -127,7 +128,7 @@ jobs:
             echo "✅ Pushed new version: ${{ needs.build-api.outputs.tag }}"
           fi
 
-  notify-success:
+  notify-docker-success:
     needs: [build-api, update-docker-compose]
     runs-on: ubuntu-latest
     if: success()
@@ -140,3 +141,31 @@ jobs:
           echo "- **Environment**: ${{ needs.build-api.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+  
+
+  update-k8s-files:
+    needs: build-api
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.build-api.outputs.tag }}
+      ENVIRONMENT: ${{ needs.build-api.outputs.environment }}
+    steps:
+      - name: Checkout k8s-files repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'mycodeschool-projecs/crud-k8s-files'
+          token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
+          path: 'crud-k8s-files'
+
+      - name: Update and commit app version in deployment-kube-land.yml in other repository
+        run: |
+          cd crud-k8s-files/k8s-files-raw/
+          echo -e "Current ./command-service.yaml\n$(cat command-service.yaml)"
+          sed -i -E 's_(mycodeschool/crud-command-api:)([^"]*)_\1'${{ env.TAG }}'_' command-service.yaml
+          echo -e "Updated ./command-service.yaml\n$(cat command-service.yaml)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "new app version: ${{ env.TAG }}"
+          git push origin HEAD:master
+
