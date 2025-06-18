@@ -15,6 +15,6 @@ public interface MyClientRepository extends JpaRepository<MyClient,Long> {
 
 
     @Query(value = "select c from MyClient c where c.email=?1")
-    public List<MyClient> findByEmail(String email);
+    public Optional<MyClient> findByEmail(String email);
 
 }
