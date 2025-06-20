@@ -3,6 +3,34 @@ spring:
     url: jdbc:mysql://mysql-service:3306/testdb?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: testuser
     password: testpass
+
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+
 logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    org.springframework: INFO
+    com.zaxxer.hikari: WARN
+    org.hibernate.orm.deprecation: ERROR
+    org.hibernate.orm.connections.pooling: WARN
+    root: INFO
+    org.springframework.amqp: info
+  file:
+    name: kube-ms1-logs.log
+  logstash:
+    enabled: false
+    destination: logstash:3100
+    level: OFF  # Set to ALL to enable, OFF to disable
+
+# RabbitMQ event publishing configuration
+rabbitmq:
+  exchange:
+    name: crud-events-exchange
+  routing:
+    key:
+      prefix: crud.events
