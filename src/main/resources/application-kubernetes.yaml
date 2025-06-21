@@ -11,21 +11,6 @@ spring:
     password: guest
 
 
-logging:
-  pattern:
-    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
-  level:
-    com.zaxxer.hikari: WARN
-    org.hibernate.orm.deprecation: ERROR
-    org.hibernate.orm.connections.pooling: WARN
-    root: INFO
-    org.springframework.amqp: info
-  file:
-    name: kube-ms1-logs.log
-  logstash:
-    enabled: false
-    destination: logstash:3100
-    level: OFF  # Set to ALL to enable, OFF to disable
 
 # RabbitMQ event publishing configuration
 rabbitmq:
