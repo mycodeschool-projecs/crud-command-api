@@ -78,17 +78,30 @@ metrics:
         server:
           requests: true
 
+#logging:
+#  pattern:
+#    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+#  level:
+#    com.zaxxer.hikari: WARN
+#    org.hibernate.orm.deprecation: ERROR
+#    org.hibernate.orm.connections.pooling: WARN
+#    root: INFO
+#    org.springframework.amqp: info
+#  file:
+#    name: crud-logs.log
+#  logstash:
+#    enabled: false
+#    destination: localhost:3100
+#    level: OFF  # Set to ALL to enable, OFF to disable
+
 logging:
   pattern:
     level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    com.zaxxer.hikari: WARN
-    org.hibernate.orm.deprecation: ERROR
-    org.hibernate.orm.connections.pooling: WARN
-    root: INFO
+    root: debug
     org.springframework.amqp: info
   file:
-    name: kube-ms1-logs.log
+    name: crud-logs.log
   logstash:
     enabled: false
     destination: localhost:3100
