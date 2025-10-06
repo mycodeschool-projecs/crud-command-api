@@ -3,6 +3,6 @@ spring:
     url: jdbc:mysql://crud-proj-mysql-service:3306/testdb?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: testuser
     password: testpass
-#logging:
-#  logstash:
-#    enabled: false
+logging:
+  level:
+    org.springframework: INFO
