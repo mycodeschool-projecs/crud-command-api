@@ -3,6 +3,62 @@ spring:
     url: jdbc:mysql://crud-proj-mysql-service:3306/testdb?useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: testuser
     password: testpass
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /docs
+    operations-sorter: method
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+# Actuator and Monitoring Configuration
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
 logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
   level:
-    org.springframework: INFO
+    com.zaxxer.hikari: WARN
+    org.hibernate.orm.deprecation: ERROR
+    org.hibernate.orm.connections.pooling: WARN
+    root: INFO
+    org.springframework.amqp: info
+  file:
+    name: crud-logs.log
+  logstash:
+    enabled: true
+    destination: logstash:3100
+    level: OFF  # Set to ALL to enable, OFF to disable
+
+# RabbitMQ event publishing configuration
+rabbitmq:
+  exchange:
+    name: crud-events-exchange
+  routing:
+    key:
+      prefix: crud.events
